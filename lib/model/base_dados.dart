@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 class BaseDados {
   Future<Database> conectar() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, 'hello_here.db');
+    String path = join(documentsDirectory.path, 'minhas_financas.db');
     return await openDatabase(path, version: 1,
         onCreate: (Database db, version) async {
       await db.execute(''' CREATE TABLE entrada(
@@ -14,10 +14,6 @@ class BaseDados {
       valor REAL,
       nome TEXT,
       dataHora TEXT) ''');
-      await db.execute(''' CREATE TABLE saldo (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        valor REAL,
-      )''');
       await db.execute(''' CREATE TABLE saida (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         valor REAL,
