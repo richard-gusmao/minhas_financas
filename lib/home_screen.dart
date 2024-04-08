@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:minhas_financas/components/dados_lista.dart';
@@ -63,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   void salvar() async {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) => const Center(
         child: CircularProgressIndicator(),
@@ -89,7 +89,10 @@ class _HomeScreenState extends State<HomeScreen>
     Navigator.of(context).pop();
     setState(() {
       alert = "";
+      optionsSelected = null;
     });
+    _nameController.clear();
+    _valueController.clear();
   }
 
   @override
@@ -137,8 +140,8 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             Text(
               NumberFormat.decimalPattern().format(saldoDisponivel),
-              style: const TextStyle(
-                color: Colors.green,
+              style: TextStyle(
+                color: saldoDisponivel > 0 ? Colors.green : Colors.red,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
@@ -234,6 +237,7 @@ class _HomeScreenState extends State<HomeScreen>
                         height: 10,
                       ),
                       TextField(
+                        keyboardType: TextInputType.number,
                         controller: _valueController,
                         decoration: const InputDecoration(
                           hintText: "Valor",
@@ -263,10 +267,18 @@ class _HomeScreenState extends State<HomeScreen>
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            if (_nameController.text.isNotEmpty ||
-                                _valueController.text.isNotEmpty) {
-                              Navigator.of(context).pop();
-                              salvar();
+                            if ((_nameController.text.isNotEmpty ||
+                                    _valueController.text.isNotEmpty) &&
+                                optionsSelected != null) {
+                              try {
+                                double.parse(_valueController.text);
+                                Navigator.of(context).pop();
+                                salvar();
+                              } catch (err) {
+                                setState(() {
+                                  alert = "Valor Errado";
+                                });
+                              }
                             } else {
                               setState(() {
                                 alert = "Preenha os Campos";
