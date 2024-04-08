@@ -24,7 +24,10 @@ class Saida {
 
   Future<List> obterTodos() async {
     final db = await BaseDados().conectar();
-    List data = await db.query("saida");
+    List data = await db.query(
+      "saida",
+      orderBy: 'id DESC',
+    );
     return data;
   }
 }
