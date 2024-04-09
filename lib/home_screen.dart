@@ -16,13 +16,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int? optionsSelected;
   double saldoDisponivel = 0;
   String alert = "";
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
-
+  int pageIndex = 0;
   List entradaData = [];
   List saidaData = [];
 
@@ -68,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen>
         child: CircularProgressIndicator(),
       ),
     );
-    if (optionsSelected == 1) {
+    if (pageIndex == 1) {
       await Entrada(
               nome: _nameController.text,
               valor: double.parse(_valueController.text),
@@ -76,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen>
           .adicionar();
       await getDataEntrada();
     }
-    if (optionsSelected == 2) {
+    if (pageIndex == 2) {
       await Saida(
               nome: _nameController.text,
               valor: double.parse(_valueController.text),
@@ -84,20 +83,27 @@ class _HomeScreenState extends State<HomeScreen>
           .adicionar();
       await getDataSaida();
     }
-    setSaldo(double.parse(_valueController.text), optionsSelected ?? 0);
+    setSaldo(double.parse(_valueController.text), pageIndex);
     // ignore: use_build_context_synchronously
     Navigator.of(context).pop();
     setState(() {
       alert = "";
-      optionsSelected = null;
     });
     _nameController.clear();
     _valueController.clear();
   }
 
+  void _handleTabSelection() {
+    setState(() {
+      pageIndex = _tabController.index + 1;
+    });
+  }
+
   @override
   void initState() {
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController =
+        TabController(length: 2, vsync: this, initialIndex: pageIndex);
+    _tabController.addListener(_handleTabSelection);
     super.initState();
     getSaldo();
     getDataEntrada();
@@ -204,29 +210,6 @@ class _HomeScreenState extends State<HomeScreen>
                   height: 400,
                   child: Column(
                     children: [
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      DropdownButton(
-                        value: optionsSelected,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 1,
-                            child: Text("Entrada"),
-                          ),
-                          DropdownMenuItem(
-                            value: 2,
-                            child: Text("Saida"),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            optionsSelected = value;
-                          });
-                        },
-                        hint: const Text("Selecione o tipo"),
-                        padding: const EdgeInsets.all(10),
-                      ),
                       TextField(
                         controller: _nameController,
                         decoration: const InputDecoration(
@@ -268,8 +251,7 @@ class _HomeScreenState extends State<HomeScreen>
                         child: ElevatedButton(
                           onPressed: () {
                             if ((_nameController.text.isNotEmpty ||
-                                    _valueController.text.isNotEmpty) &&
-                                optionsSelected != null) {
+                                _valueController.text.isNotEmpty)) {
                               try {
                                 double.parse(_valueController.text);
                                 Navigator.of(context).pop();
